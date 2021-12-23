@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Soldrop",
+  "name": "Soldrop lets you airdrop SPL tokens to multiple addresses with a single click",
   "icons": [
     {
       "src": "favicon.ico",
