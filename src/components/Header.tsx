@@ -5,6 +5,7 @@ import { AppContext } from '../App';
 import Logo from '../assets/img/logo.svg';
 import { getAllTokensOwnedByUser, getConnection } from '../utils/functions';
 import { shortenAddress } from '../utils/parser';
+import GithubLogo from '../assets/img/github.svg';
 
 export default function Header() {
   const { setWallet, wallet, setSelectedToken } = useContext(AppContext);
@@ -44,6 +45,12 @@ export default function Header() {
         <LogoContainer>
           <img src={Logo} alt="Soldrop Logo" />
         </LogoContainer>
+        <GithubLogoContainer
+          href="https://github.com/hritique/soldrop"
+          target="_blank"
+        >
+          <img src={GithubLogo} alt="Github" />
+        </GithubLogoContainer>
         {wallet ? (
           <WalletContainer>
             <p className="address">
@@ -81,6 +88,16 @@ const LogoContainer = styled.a`
 
   img {
     height: 100%;
+  }
+`;
+
+const GithubLogoContainer = styled.a`
+  margin-right: auto;
+  margin-left: 16px;
+  cursor: pointer;
+
+  img {
+    width: 20px;
   }
 `;
 
