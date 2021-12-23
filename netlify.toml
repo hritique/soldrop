@@ -1,0 +1,4 @@
+[context.production]
+	environment = { REACT_APP_SOLANA_CLUSTER = "mainnet-beta" }
+[context.devnet]
+	environment = { REACT_APP_SOLANA_CLUSTER = "devnet" }
