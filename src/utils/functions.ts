@@ -20,6 +20,10 @@ export const getConnection = (endpoint: Cluster) => {
   return new Connection(clusterApiUrl(endpoint));
 };
 
+export const getExplorerLink = (id: string, entity: string = 'tx') => {
+  return `https://explorer.solana.com/${entity}/${id}?cluster=${process.env.REACT_APP_SOLANA_CLUSTER}`;
+};
+
 export const getAllTokensOwnedByUser = async (
   connection: Connection,
   publicKey: PublicKey
@@ -104,7 +108,7 @@ export const calculateTotalSolRequired = async (
         tokenMint
       );
 
-      if (associatedTokenAccount.exists) {
+      if (!associatedTokenAccount.exists) {
         numberOfNewAccounts++;
       }
     }
