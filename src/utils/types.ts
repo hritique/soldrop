@@ -40,9 +40,19 @@ interface InvalidPublicKey {
   asString: string;
 }
 
+interface IdleTransaction {
+  status: TransactionStatus.IDLE;
+  hash?: undefined;
+}
+
+interface ProgressTransaction {
+  status: Exclude<TransactionStatus, TransactionStatus.IDLE>;
+  hash: string;
+}
+
 export interface Account {
   id: string;
   publicKey: ValidPublicKey | InvalidPublicKey;
   amount: string;
-  transactionStatus: TransactionStatus;
+  transaction: IdleTransaction | ProgressTransaction;
 }

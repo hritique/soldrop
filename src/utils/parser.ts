@@ -4,9 +4,9 @@ import { TransactionStatus } from './types';
 import { v4 as uuid } from 'uuid';
 import CSV from 'papaparse';
 
-export const parseCsv = (rawData: string): Account[] => {
+export const parseCsv = (rawData: string) => {
   const parsed = CSV.parse<string>(rawData, { skipEmptyLines: true });
-  const parsedAccounts = parsed.data.slice(1).map((row) => {
+  const parsedAccounts: Account[] = parsed.data.slice(1).map((row) => {
     let publicKey: Account['publicKey'];
 
     try {
@@ -24,7 +24,7 @@ export const parseCsv = (rawData: string): Account[] => {
       id: uuid(),
       publicKey,
       amount: row[1].trim(),
-      transactionStatus: TransactionStatus.IDLE,
+      transaction: { status: TransactionStatus.IDLE },
     };
   });
 
