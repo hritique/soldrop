@@ -1,6 +1,7 @@
 import { PublicKey } from '@solana/web3.js';
 import { FC, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { getExplorerLink } from '../utils/functions';
 import { Account, TransactionStatus } from '../utils/types';
 import { ErrorBox, ProgressBox, SuccessBox } from './StatusBox';
 
@@ -89,7 +90,7 @@ const GridView: FC<{ accounts: Account[]; setAccounts: any }> = ({
                       amount: account.amount ? account.amount.toString() : '',
                     });
                   }}
-                  placeholder={i === 0 ? 'Enter Address Public Key' : ''}
+                  placeholder={i === 0 ? 'Enter Public Key' : ''}
                 />
               </td>
               <td className="amount">
@@ -107,13 +108,40 @@ const GridView: FC<{ accounts: Account[]; setAccounts: any }> = ({
                 />
               </td>
               <td className="status">
-                {account.transactionStatus === TransactionStatus.PROGRESS ? (
-                  <ProgressBox>Sending...</ProgressBox>
-                ) : account.transactionStatus ===
+                {account.transaction.status === TransactionStatus.PROGRESS ? (
+                  <ProgressBox>
+                    <a
+                      href={getExplorerLink(account.transaction.hash)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: 'inherit' }}
+                    >
+                      Pending...
+                    </a>
+                  </ProgressBox>
+                ) : account.transaction.status ===
                   TransactionStatus.SUCCESSFUL ? (
-                  <SuccessBox>Successful</SuccessBox>
-                ) : account.transactionStatus === TransactionStatus.FAILED ? (
-                  <ErrorBox>Failed</ErrorBox>
+                  <SuccessBox>
+                    <a
+                      href={getExplorerLink(account.transaction.hash)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: 'inherit' }}
+                    >
+                      Successful
+                    </a>
+                  </SuccessBox>
+                ) : account.transaction.status === TransactionStatus.FAILED ? (
+                  <ErrorBox>
+                    <a
+                      href={getExplorerLink(account.transaction.hash)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: 'inherit' }}
+                    >
+                      Successful
+                    </a>
+                  </ErrorBox>
                 ) : null}
               </td>
             </tr>
