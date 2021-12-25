@@ -276,12 +276,6 @@ const Main = styled.main`
   gap: 18px;
 `;
 
-const HR = styled.div`
-  width: 100%;
-  margin: 2rem 0;
-  border-top: 2px dashed #2c2c35;
-`;
-
 const Footer = styled.footer`
   width: 100%;
   display: flex;
