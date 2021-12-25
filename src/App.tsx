@@ -215,7 +215,6 @@ function App() {
           <Content>
             <Main>
               <TokenInput tokens={wallet?.tokens || []} />
-              <HR />
               <AccountsTable />
             </Main>
           </Content>
@@ -274,6 +273,7 @@ const Main = styled.main`
   margin: 0 auto;
   display: flex;
   flex-direction: column;
+  gap: 18px;
 `;
 
 const HR = styled.div`
