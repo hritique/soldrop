@@ -20,3 +20,12 @@ export const downloadFile = async (data: string, fileName: string) => {
   window.URL.revokeObjectURL(downloadUrl);
   aTag.remove();
 };
+
+export const addDecimalNumberStrings = (
+  strings: string[],
+  decimals: number = 9
+) => {
+  return strings.reduce((prev, curr) => {
+    return Number((prev + Number(curr)).toFixed(decimals));
+  }, 0);
+};

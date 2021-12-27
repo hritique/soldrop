@@ -1,7 +1,8 @@
 import { PublicKey } from '@solana/web3.js';
-import { FC, useEffect, useState } from 'react';
+import { FC, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { getExplorerLink } from '../utils/functions';
+import { AppContext } from '../App';
+import { addDecimalNumberStrings, getExplorerLink } from '../utils/functions';
 import { Account, TransactionStatus } from '../utils/types';
 import { ErrorBox, ProgressBox, SuccessBox } from './StatusBox';
 
@@ -10,6 +11,7 @@ const GridView: FC<{ accounts: Account[]; setAccounts: any }> = ({
   setAccounts,
 }) => {
   const [totalAmount, setTotalAmount] = useState(0);
+  const { selectedToken } = useContext(AppContext);
 
   const updateAccount = (
     id: string,
@@ -51,12 +53,13 @@ const GridView: FC<{ accounts: Account[]; setAccounts: any }> = ({
   };
 
   useEffect(() => {
-    let total = 0;
-    accounts.forEach((a) => {
-      total += parseFloat(a.amount) || 0;
-    });
-    setTotalAmount(total);
-  }, [accounts]);
+    setTotalAmount(
+      addDecimalNumberStrings(
+        accounts.map((a) => a.amount),
+        selectedToken && selectedToken.decimals
+      )
+    );
+  }, [accounts, selectedToken]);
 
   return (
     <Table>
@@ -157,7 +160,7 @@ const GridView: FC<{ accounts: Account[]; setAccounts: any }> = ({
             Total
           </td>
           <td align="left" className="amount">
-            {totalAmount.toFixed(9)}
+            {totalAmount}
           </td>
         </tr>
       </tfoot>
