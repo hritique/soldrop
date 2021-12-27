@@ -12,15 +12,14 @@ import AccountsTable from './components/AccountsTable';
 import Header from './components/Header';
 import DownloadSignerKeypair from './components/modals/DownloadSignerKeypair';
 import TokenInput from './components/TokenInput';
-import {
-  calculateTotalSolRequired,
-  createTokenTransferInstruction,
-  downloadFile,
-  getConnection,
-  transferTokenToTemporaryAccount,
-} from './utils/functions';
+import { downloadFile, getConnection } from './utils/functions';
+import { createTokenTransferInstruction } from './utils/instructions';
 import { theme } from './utils/theme';
 import { Account, Solana, SolanaToken, TransactionStatus } from './utils/types';
+import {
+  calculateTotalSolRequired,
+  transferTokenToTemporaryAccount,
+} from './utils/web3';
 
 const defaultContextValue = {
   accounts: [],

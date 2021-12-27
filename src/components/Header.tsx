@@ -2,10 +2,11 @@ import { Cluster, PublicKey } from '@solana/web3.js';
 import { useContext, useState } from 'react';
 import styled from 'styled-components';
 import { AppContext } from '../App';
-import Logo from '../assets/img/logo.svg';
-import { getAllTokensOwnedByUser, getConnection } from '../utils/functions';
-import { shortenAddress } from '../utils/parser';
 import GithubLogo from '../assets/img/github.svg';
+import Logo from '../assets/img/logo.svg';
+import { getConnection } from '../utils/functions';
+import { shortenAddress } from '../utils/parser';
+import { getAllTokensOwnedByUser } from '../utils/web3';
 
 export default function Header() {
   const { setWallet, wallet, setSelectedToken } = useContext(AppContext);
