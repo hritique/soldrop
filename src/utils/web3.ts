@@ -52,7 +52,7 @@ export const getAllTokensOwnedByUser = async (
     return {
       mint: new PublicKey(a.mint),
       address: a.publicKey,
-      tokenAmount: a.tokenAmount.uiAmount,
+      tokenAmount: a.tokenAmount.uiAmountString || `${a.tokenAmount.uiAmount}`,
       name: tokenData ? tokenData.name : a.mint,
       logo: tokenData && tokenData.logoURI,
       decimals: a.tokenAmount.decimals,

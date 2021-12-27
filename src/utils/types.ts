@@ -3,9 +3,9 @@ import { PublicKey, Transaction } from '@solana/web3.js';
 export interface SolanaToken {
   address: PublicKey;
   mint: PublicKey;
-  name?: string;
+  name: string;
   logo?: string;
-  tokenAmount?: number;
+  tokenAmount: string;
   decimals: number;
 }
 
