@@ -85,14 +85,14 @@ export const getATAInfo = async (
 
 export const calculateTotalSolRequired = async (
   connection: Connection,
-  addresses: Account[],
+  accounts: Account[],
   token: SolanaToken
 ) => {
   const { mint: tokenMint } = token;
-  let numberOfNewAccounts = 1; // 1 for the creation of ATA for the signer account
+  let numberOfNewAccounts = 1; // 1 for the creation of the temporary account
 
-  for (let i = 0; i < addresses.length; i++) {
-    const address = addresses[i];
+  for (let i = 0; i < accounts.length; i++) {
+    const address = accounts[i];
     if (address.publicKey.value) {
       const { value: ownerTokenAccounts } =
         await connection.getTokenAccountsByOwner(address.publicKey.value, {
@@ -111,7 +111,14 @@ export const calculateTotalSolRequired = async (
   const totalRentFeeInLamports =
     minimumBalanceForRentExemption * numberOfNewAccounts;
 
-  return totalRentFeeInLamports * 10;
+  const {
+    feeCalculator: { lamportsPerSignature },
+  } = await connection.getRecentBlockhash();
+
+  const totalTransactionFeesInLamports =
+    (accounts.length + 1) * lamportsPerSignature;
+
+  return totalRentFeeInLamports + totalTransactionFeesInLamports;
 };
 
 export const transferTokenToTemporaryAccount = async (
