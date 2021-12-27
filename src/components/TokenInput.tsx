@@ -41,11 +41,6 @@ export default function TokenInput({ tokens }: { tokens: SolanaToken[] }) {
           </Option>
         ))}
       </Select>
-      {/* {tokens.map((token, i: number) => (
-          <option key={token.mint.toString()} value={token.mint.toString()}>
-            {token.name}
-          </option>
-        ))} */}
       {selectedToken && (
         <span className="amount">Balance: {selectedToken.tokenAmount}</span>
       )}
