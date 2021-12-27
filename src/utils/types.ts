@@ -6,6 +6,7 @@ export interface SolanaToken {
   name?: string;
   logo?: string;
   tokenAmount?: number;
+  decimals: number;
 }
 
 export interface Solana {

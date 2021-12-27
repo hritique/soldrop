@@ -55,6 +55,7 @@ export const getAllTokensOwnedByUser = async (
       tokenAmount: a.tokenAmount.uiAmount,
       name: tokenData ? tokenData.name : a.mint,
       logo: tokenData && tokenData.logoURI,
+      decimals: a.tokenAmount.decimals,
     };
   });
 };
