@@ -94,13 +94,12 @@ export const calculateTotalSolRequired = async (
   for (let i = 0; i < addresses.length; i++) {
     const address = addresses[i];
     if (address.publicKey.value) {
-      const associatedTokenAccount = await getATAInfo(
-        connection,
-        address.publicKey.value,
-        tokenMint
-      );
+      const { value: ownerTokenAccounts } =
+        await connection.getTokenAccountsByOwner(address.publicKey.value, {
+          mint: tokenMint,
+        });
 
-      if (!associatedTokenAccount.exists) {
+      if (ownerTokenAccounts.length < 1) {
         numberOfNewAccounts++;
       }
     }
