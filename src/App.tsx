@@ -1,4 +1,9 @@
 import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  Token,
+  TOKEN_PROGRAM_ID,
+} from '@solana/spl-token';
+import {
   Cluster,
   Keypair,
   LAMPORTS_PER_SOL,
@@ -96,12 +101,20 @@ function App() {
       }
 
       setTransactionMessage('Transferring tokens to temporary account');
-      const { associatedTokenAddress } = await transferTokenToTemporaryAccount(
+      const temporaryAccountATA = await Token.getAssociatedTokenAddress(
+        ASSOCIATED_TOKEN_PROGRAM_ID,
+        TOKEN_PROGRAM_ID,
+        selectedToken.mint,
+        temporarySignerAccount.publicKey
+      );
+
+      await transferTokenToTemporaryAccount(
         connection,
         selectedToken,
         totalTokenToTransfer * Math.pow(10, selectedToken.decimals),
         wallet,
         temporarySignerAccount,
+        temporaryAccountATA,
         totalSolRequiredInLamports
       );
 
@@ -122,10 +135,10 @@ function App() {
 
           const instructions = await createTokenTransferInstruction(
             connection,
-            associatedTokenAddress,
+            temporaryAccountATA,
             account.publicKey.value || wallet.publicKey,
             selectedToken?.mint,
-            +account.amount * LAMPORTS_PER_SOL,
+            Number(account.amount) * LAMPORTS_PER_SOL,
             temporarySignerAccount
           );
 

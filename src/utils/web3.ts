@@ -85,22 +85,21 @@ export const getATAInfo = async (
 
 export const calculateTotalSolRequired = async (
   connection: Connection,
-  addresses: Account[],
+  accounts: Account[],
   token: SolanaToken
 ) => {
   const { mint: tokenMint } = token;
-  let numberOfNewAccounts = 1; // 1 for the creation of ATA for the signer account
+  let numberOfNewAccounts = 1; // 1 for the creation of the temporary account
 
-  for (let i = 0; i < addresses.length; i++) {
-    const address = addresses[i];
+  for (let i = 0; i < accounts.length; i++) {
+    const address = accounts[i];
     if (address.publicKey.value) {
-      const associatedTokenAccount = await getATAInfo(
-        connection,
-        address.publicKey.value,
-        tokenMint
-      );
+      const { value: ownerTokenAccounts } =
+        await connection.getTokenAccountsByOwner(address.publicKey.value, {
+          mint: tokenMint,
+        });
 
-      if (!associatedTokenAccount.exists) {
+      if (ownerTokenAccounts.length < 1) {
         numberOfNewAccounts++;
       }
     }
@@ -112,7 +111,14 @@ export const calculateTotalSolRequired = async (
   const totalRentFeeInLamports =
     minimumBalanceForRentExemption * numberOfNewAccounts;
 
-  return totalRentFeeInLamports * 10;
+  const {
+    feeCalculator: { lamportsPerSignature },
+  } = await connection.getRecentBlockhash();
+
+  const totalTransactionFeesInLamports =
+    (accounts.length + 1) * lamportsPerSignature;
+
+  return totalRentFeeInLamports + totalTransactionFeesInLamports;
 };
 
 export const transferTokenToTemporaryAccount = async (
@@ -121,15 +127,9 @@ export const transferTokenToTemporaryAccount = async (
   totalAmountOfTokensInLamports: number,
   wallet: Solana,
   temporaryAccount: Keypair,
+  temporaryAccountATA: PublicKey,
   totalSolForAtaAndFeeInLamports: number
 ) => {
-  const associatedTokenAddress = await Token.getAssociatedTokenAddress(
-    ASSOCIATED_TOKEN_PROGRAM_ID,
-    TOKEN_PROGRAM_ID,
-    token.mint,
-    temporaryAccount.publicKey
-  );
-
   const { blockhash: recentBlockhash } = await connection.getRecentBlockhash();
   const transaction = new Transaction({
     feePayer: wallet.publicKey,
@@ -150,7 +150,7 @@ export const transferTokenToTemporaryAccount = async (
       ASSOCIATED_TOKEN_PROGRAM_ID,
       TOKEN_PROGRAM_ID,
       token.mint,
-      associatedTokenAddress,
+      temporaryAccountATA,
       temporaryAccount.publicKey,
       wallet.publicKey
     )
@@ -160,7 +160,7 @@ export const transferTokenToTemporaryAccount = async (
     Token.createTransferInstruction(
       TOKEN_PROGRAM_ID,
       token.address,
-      associatedTokenAddress,
+      temporaryAccountATA,
       wallet.publicKey,
       [],
       totalAmountOfTokensInLamports
@@ -171,5 +171,5 @@ export const transferTokenToTemporaryAccount = async (
   const txHash = await connection.sendRawTransaction(signed.serialize());
   await connection.confirmTransaction(txHash);
 
-  return { txHash, associatedTokenAddress };
+  return txHash;
 };
