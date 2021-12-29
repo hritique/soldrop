@@ -1,7 +1,23 @@
 import { Cluster, clusterApiUrl, Connection } from '@solana/web3.js';
 
 export const getConnection = (endpoint: Cluster) => {
-  return new Connection(clusterApiUrl(endpoint));
+  switch (endpoint) {
+    case 'mainnet-beta':
+      return new Connection(
+        `https://solana--mainnet.datahub.figment.io/apikey/${process.env.REACT_APP_FIGMENT_DATAHUB_API_KEY}`
+      );
+
+    case 'devnet':
+      return new Connection(
+        `https://solana--devnet.datahub.figment.io/apikey/${process.env.REACT_APP_FIGMENT_DATAHUB_API_KEY}`
+      );
+
+    case 'testnet':
+      return new Connection(clusterApiUrl('testnet'));
+
+    default:
+      return new Connection(clusterApiUrl());
+  }
 };
 
 export const getExplorerLink = (id: string, entity: string = 'tx') => {
