@@ -172,47 +172,39 @@ function App() {
           temporarySignerAccount
         );
 
-        if (instructions) {
-          responses[i] = {};
-          responses[i].address = account.publicKey.asString;
+        responses[i] = {};
+        responses[i].address = account.publicKey.asString;
 
-          const { blockhash: recentBlockhash } =
-            await connection.getRecentBlockhash();
+        const { blockhash: recentBlockhash } =
+          await connection.getRecentBlockhash();
 
-          const transaction = new Transaction({
-            feePayer: temporarySignerAccount.publicKey,
-            recentBlockhash,
-          });
+        const transaction = new Transaction({
+          feePayer: temporarySignerAccount.publicKey,
+          recentBlockhash,
+        });
 
-          transaction.add(...instructions);
+        transaction.add(...instructions);
 
-          try {
-            const txHash = await connection.sendTransaction(transaction, [
-              temporarySignerAccount,
-            ]);
+        try {
+          const txHash = await connection.sendTransaction(transaction, [
+            temporarySignerAccount,
+          ]);
 
-            updatedAccounts[i].transaction.status = TransactionStatus.PROGRESS;
-            updatedAccounts[i].transaction.hash = txHash;
-            setAccounts(updatedAccounts);
-
-            await connection.confirmTransaction(txHash);
-
-            updatedAccounts[i].transaction.status =
-              TransactionStatus.SUCCESSFUL;
-            setAccounts(updatedAccounts);
-
-            responses[i].response = 'Transaction successful';
-            responses[i].txHash = txHash;
-          } catch (error: any) {
-            updatedAccounts[i].transaction.status = TransactionStatus.FAILED;
-            setAccounts(updatedAccounts);
-            responses[i].response = `Transaction failed: ${error.message}`;
-          }
-        } else {
-          updatedAccounts[i].transaction.status = TransactionStatus.IDLE;
+          updatedAccounts[i].transaction.status = TransactionStatus.PROGRESS;
+          updatedAccounts[i].transaction.hash = txHash;
           setAccounts(updatedAccounts);
-          responses[i].response =
-            'Transaction skipped as the account does not exist';
+
+          await connection.confirmTransaction(txHash);
+
+          updatedAccounts[i].transaction.status = TransactionStatus.SUCCESSFUL;
+          setAccounts(updatedAccounts);
+
+          responses[i].response = 'Transaction successful';
+          responses[i].txHash = txHash;
+        } catch (error: any) {
+          updatedAccounts[i].transaction.status = TransactionStatus.FAILED;
+          setAccounts(updatedAccounts);
+          responses[i].response = `Transaction failed: ${error.message}`;
         }
       });
 
