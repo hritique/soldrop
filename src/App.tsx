@@ -89,10 +89,40 @@ function App() {
         return alert('Insufficient tokens');
       }
 
+      let numberOfNewAccounts = 1; // 1 for temporary account
+
+      const newAccountRequirement = await batchRequests(
+        accounts.slice(0, 20),
+        10,
+        1000,
+        async (address, index) => {
+          if (address.publicKey.value) {
+            setTransactionMessage(
+              `Fetching token account details for account: ${index + 1}/${
+                accounts.length
+              }`
+            );
+            const { value: ownerTokenAccounts } =
+              await connection.getTokenAccountsByOwner(
+                address.publicKey.value,
+                {
+                  mint: selectedToken.mint,
+                }
+              );
+
+            return ownerTokenAccounts.length < 1;
+          } else {
+            return false;
+          }
+        }
+      );
+
+      numberOfNewAccounts += newAccountRequirement.filter((a) => a).length;
+
       const totalSolRequiredInLamports = await calculateTotalSolRequired(
         connection,
         accounts,
-        selectedToken
+        numberOfNewAccounts
       );
 
       if (totalSolRequiredInLamports >= wallet.balanceInLamports) {
