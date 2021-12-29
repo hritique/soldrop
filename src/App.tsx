@@ -19,6 +19,7 @@ import DownloadSignerKeypair from './components/modals/DownloadSignerKeypair';
 import TokenInput from './components/TokenInput';
 import {
   addDecimalNumberStrings,
+  batchRequests,
   downloadFile,
   getConnection,
 } from './utils/functions';
@@ -89,10 +90,40 @@ function App() {
         return alert('Insufficient tokens');
       }
 
+      let numberOfNewAccounts = 1; // 1 for temporary account
+
+      const newAccountRequirement = await batchRequests(
+        accounts.slice(0, 20),
+        10,
+        1000,
+        async (address, index) => {
+          if (address.publicKey.value) {
+            setTransactionMessage(
+              `Fetching token account details for account: ${index + 1}/${
+                accounts.length
+              }`
+            );
+            const { value: ownerTokenAccounts } =
+              await connection.getTokenAccountsByOwner(
+                address.publicKey.value,
+                {
+                  mint: selectedToken.mint,
+                }
+              );
+
+            return ownerTokenAccounts.length < 1;
+          } else {
+            return false;
+          }
+        }
+      );
+
+      numberOfNewAccounts += newAccountRequirement.filter((a) => a).length;
+
       const totalSolRequiredInLamports = await calculateTotalSolRequired(
         connection,
         accounts,
-        selectedToken
+        numberOfNewAccounts
       );
 
       if (totalSolRequiredInLamports >= wallet.balanceInLamports) {
@@ -125,67 +156,57 @@ function App() {
         txHash?: string;
       }[] = [];
 
-      setTransactionMessage('Transferring tokens in individual accounts');
+      setTransactionMessage('Transferring tokens to individual accounts');
 
-      await Promise.all(
-        accounts.map(async (account, i) => {
-          let updatedAccounts = [...accounts];
+      await batchRequests(accounts, 10, 1000, async (account, i) => {
+        let updatedAccounts = [...accounts];
 
-          if (!account.publicKey.isValid) return null;
+        if (!account.publicKey.isValid) return null;
 
-          const instructions = await createTokenTransferInstruction(
-            connection,
-            temporaryAccountATA,
-            account.publicKey.value || wallet.publicKey,
-            selectedToken?.mint,
-            Number(account.amount) * LAMPORTS_PER_SOL,
-            temporarySignerAccount
-          );
+        const instructions = await createTokenTransferInstruction(
+          connection,
+          temporaryAccountATA,
+          account.publicKey.value || wallet.publicKey,
+          selectedToken?.mint,
+          Number(account.amount) * LAMPORTS_PER_SOL,
+          temporarySignerAccount
+        );
 
-          if (instructions) {
-            updatedAccounts[i].transaction.status = TransactionStatus.PROGRESS;
-            setAccounts(updatedAccounts);
-            responses[i] = {};
-            responses[i].address = account.publicKey.asString;
+        responses[i] = {};
+        responses[i].address = account.publicKey.asString;
 
-            const { blockhash: recentBlockhash } =
-              await connection.getRecentBlockhash();
+        const { blockhash: recentBlockhash } =
+          await connection.getRecentBlockhash();
 
-            const transaction = new Transaction({
-              feePayer: temporarySignerAccount.publicKey,
-              recentBlockhash,
-            });
+        const transaction = new Transaction({
+          feePayer: temporarySignerAccount.publicKey,
+          recentBlockhash,
+        });
 
-            transaction.add(...instructions);
+        transaction.add(...instructions);
 
-            try {
-              const txHash = await connection.sendTransaction(transaction, [
-                temporarySignerAccount,
-              ]);
+        try {
+          const txHash = await connection.sendTransaction(transaction, [
+            temporarySignerAccount,
+          ]);
 
-              updatedAccounts[i].transaction.hash = txHash;
-              setAccounts(updatedAccounts);
+          updatedAccounts[i].transaction.status = TransactionStatus.PROGRESS;
+          updatedAccounts[i].transaction.hash = txHash;
+          setAccounts(updatedAccounts);
 
-              await connection.confirmTransaction(txHash);
+          await connection.confirmTransaction(txHash);
 
-              updatedAccounts[i].transaction.status =
-                TransactionStatus.SUCCESSFUL;
-              setAccounts(updatedAccounts);
-              responses[i].response = 'Transaction successful';
-              responses[i].txHash = txHash;
-            } catch (error) {
-              updatedAccounts[i].transaction.status = TransactionStatus.FAILED;
-              setAccounts(updatedAccounts);
-              responses[i].response = 'Transaction failed';
-            }
-          } else {
-            updatedAccounts[i].transaction.status = TransactionStatus.IDLE;
-            setAccounts(updatedAccounts);
-            responses[i].response =
-              'Transaction skipped as the account does not exist';
-          }
-        })
-      );
+          updatedAccounts[i].transaction.status = TransactionStatus.SUCCESSFUL;
+          setAccounts(updatedAccounts);
+
+          responses[i].response = 'Transaction successful';
+          responses[i].txHash = txHash;
+        } catch (error: any) {
+          updatedAccounts[i].transaction.status = TransactionStatus.FAILED;
+          setAccounts(updatedAccounts);
+          responses[i].response = `Transaction failed: ${error.message}`;
+        }
+      });
 
       setTemporarySignerAccount(undefined);
       downloadFile(JSON.stringify({ result: responses }), 'Result.json');

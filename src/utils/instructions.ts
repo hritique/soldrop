@@ -20,13 +20,9 @@ export const createTokenTransferInstruction = async (
     destinationAccountAddress
   );
 
-  if (!destinationAccountInfo) {
-    return;
-  }
-
   // If the address is not a token address
   if (
-    destinationAccountInfo &&
+    !destinationAccountInfo ||
     destinationAccountInfo.owner !== TOKEN_PROGRAM_ID
   ) {
     // Fetch existing token account

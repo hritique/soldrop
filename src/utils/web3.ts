@@ -86,25 +86,8 @@ export const getATAInfo = async (
 export const calculateTotalSolRequired = async (
   connection: Connection,
   accounts: Account[],
-  token: SolanaToken
+  numberOfNewAccounts: number
 ) => {
-  const { mint: tokenMint } = token;
-  let numberOfNewAccounts = 1; // 1 for the creation of the temporary account
-
-  for (let i = 0; i < accounts.length; i++) {
-    const address = accounts[i];
-    if (address.publicKey.value) {
-      const { value: ownerTokenAccounts } =
-        await connection.getTokenAccountsByOwner(address.publicKey.value, {
-          mint: tokenMint,
-        });
-
-      if (ownerTokenAccounts.length < 1) {
-        numberOfNewAccounts++;
-      }
-    }
-  }
-
   const minimumBalanceForRentExemption =
     await Token.getMinBalanceRentForExemptAccount(connection);
 
