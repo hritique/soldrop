@@ -19,6 +19,7 @@ import DownloadSignerKeypair from './components/modals/DownloadSignerKeypair';
 import TokenInput from './components/TokenInput';
 import {
   addDecimalNumberStrings,
+  batchRequests,
   downloadFile,
   getConnection,
 } from './utils/functions';
@@ -155,67 +156,65 @@ function App() {
         txHash?: string;
       }[] = [];
 
-      setTransactionMessage('Transferring tokens in individual accounts');
+      setTransactionMessage('Transferring tokens to individual accounts');
 
-      await Promise.all(
-        accounts.map(async (account, i) => {
-          let updatedAccounts = [...accounts];
+      await batchRequests(accounts, 10, 1000, async (account, i) => {
+        let updatedAccounts = [...accounts];
 
-          if (!account.publicKey.isValid) return null;
+        if (!account.publicKey.isValid) return null;
 
-          const instructions = await createTokenTransferInstruction(
-            connection,
-            temporaryAccountATA,
-            account.publicKey.value || wallet.publicKey,
-            selectedToken?.mint,
-            Number(account.amount) * LAMPORTS_PER_SOL,
-            temporarySignerAccount
-          );
+        const instructions = await createTokenTransferInstruction(
+          connection,
+          temporaryAccountATA,
+          account.publicKey.value || wallet.publicKey,
+          selectedToken?.mint,
+          Number(account.amount) * LAMPORTS_PER_SOL,
+          temporarySignerAccount
+        );
 
-          if (instructions) {
+        if (instructions) {
+          responses[i] = {};
+          responses[i].address = account.publicKey.asString;
+
+          const { blockhash: recentBlockhash } =
+            await connection.getRecentBlockhash();
+
+          const transaction = new Transaction({
+            feePayer: temporarySignerAccount.publicKey,
+            recentBlockhash,
+          });
+
+          transaction.add(...instructions);
+
+          try {
+            const txHash = await connection.sendTransaction(transaction, [
+              temporarySignerAccount,
+            ]);
+
             updatedAccounts[i].transaction.status = TransactionStatus.PROGRESS;
+            updatedAccounts[i].transaction.hash = txHash;
             setAccounts(updatedAccounts);
-            responses[i] = {};
-            responses[i].address = account.publicKey.asString;
 
-            const { blockhash: recentBlockhash } =
-              await connection.getRecentBlockhash();
+            await connection.confirmTransaction(txHash);
 
-            const transaction = new Transaction({
-              feePayer: temporarySignerAccount.publicKey,
-              recentBlockhash,
-            });
-
-            transaction.add(...instructions);
-
-            try {
-              const txHash = await connection.sendTransaction(transaction, [
-                temporarySignerAccount,
-              ]);
-
-              updatedAccounts[i].transaction.hash = txHash;
-              setAccounts(updatedAccounts);
-
-              await connection.confirmTransaction(txHash);
-
-              updatedAccounts[i].transaction.status =
-                TransactionStatus.SUCCESSFUL;
-              setAccounts(updatedAccounts);
-              responses[i].response = 'Transaction successful';
-              responses[i].txHash = txHash;
-            } catch (error) {
-              updatedAccounts[i].transaction.status = TransactionStatus.FAILED;
-              setAccounts(updatedAccounts);
-              responses[i].response = 'Transaction failed';
-            }
-          } else {
-            updatedAccounts[i].transaction.status = TransactionStatus.IDLE;
+            updatedAccounts[i].transaction.status =
+              TransactionStatus.SUCCESSFUL;
             setAccounts(updatedAccounts);
-            responses[i].response =
-              'Transaction skipped as the account does not exist';
+
+            responses[i].response = 'Transaction successful';
+            responses[i].txHash = txHash;
+          } catch (error: any) {
+            updatedAccounts[i].transaction.status = TransactionStatus.FAILED;
+            setAccounts(updatedAccounts);
+            responses[i].response = `Transaction failed: ${error.message}`;
           }
-        })
-      );
+        } else {
+          updatedAccounts[i].transaction.status = TransactionStatus.IDLE;
+          setAccounts(updatedAccounts);
+          responses[i].response =
+            'Transaction skipped as the account does not exist';
+        }
+      });
 
       setTemporarySignerAccount(undefined);
       downloadFile(JSON.stringify({ result: responses }), 'Result.json');
