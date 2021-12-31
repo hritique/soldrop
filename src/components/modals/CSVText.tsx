@@ -44,8 +44,10 @@ const CSVText: FC<{
         <Textarea value={parsedAccounts} onChange={handleChange} autoFocus />
       </Container>
       <ActionsContainer>
-        <CancelButton onClick={handleClose}>Go Back</CancelButton>
-        <DoneButton onClick={handleDone}>Done</DoneButton>
+        <CancelButton onClick={handleClose}>
+          <span>Go Back</span>
+        </CancelButton>
+        <DoneButton onClick={handleDone}>Save Changes</DoneButton>
       </ActionsContainer>
     </ModalBase>
   );

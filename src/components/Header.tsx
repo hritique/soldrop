@@ -3,7 +3,6 @@ import { useContext, useState } from 'react';
 import styled from 'styled-components';
 import { AppContext } from '../App';
 import GithubLogo from '../assets/img/github.svg';
-import Logo from '../assets/img/logo.svg';
 import { getConnection } from '../utils/functions';
 import { shortenAddress } from '../utils/parser';
 import { getAllTokensOwnedByUser } from '../utils/web3';
@@ -44,7 +43,7 @@ export default function Header() {
     <Nav>
       <ContentContainer>
         <LogoContainer>
-          <img src={Logo} alt="Soldrop Logo" />
+          <img src="logo.svg" alt="Soldrop Logo" />
         </LogoContainer>
         <GithubLogoContainer
           href="https://github.com/hritique/soldrop"
@@ -55,13 +54,15 @@ export default function Header() {
         {wallet ? (
           <WalletContainer>
             <p className="address">
-              {shortenAddress(wallet.publicKey?.toString())}
+              <span>{shortenAddress(wallet.publicKey?.toString())}</span>
             </p>
-            <Button onClick={disconnectWallet}>Disconnect Wallet</Button>
+            <Button onClick={disconnectWallet}>
+              <span>Disconnect Wallet</span>
+            </Button>
           </WalletContainer>
         ) : (
           <Button onClick={connectWallet}>
-            {isConnecting ? 'Connecting...' : 'Connect Phantom'}
+            <span>{isConnecting ? 'Connecting...' : 'Connect Phantom'}</span>
           </Button>
         )}
       </ContentContainer>
@@ -71,7 +72,7 @@ export default function Header() {
 
 const Nav = styled.nav`
   width: 100%;
-  background-color: #1e1e24;
+  background-color: rgba(30, 30, 36, 0.4);
 `;
 
 const ContentContainer = styled.div`
@@ -111,6 +112,13 @@ const WalletContainer = styled.div`
     background: #2c2c35;
     padding: 0.5rem 0.8rem;
     border-radius: 4px;
+
+    span {
+      font-size: 0.9rem;
+      background: ${(props) => props.theme.colors.primary};
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
   }
 `;
 
@@ -120,6 +128,12 @@ const Button = styled.button`
   border-radius: 4px;
   padding: 0.6rem 0.8rem;
   background-color: #fff;
-  color: ${(props) => props.theme.colors.primary};
   cursor: pointer;
+
+  span {
+    font-weight: 500;
+    background: ${(props) => props.theme.colors.primary};
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 `;

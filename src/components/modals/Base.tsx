@@ -63,10 +63,16 @@ export const CancelButton = styled.button`
   border-radius: 4px;
   color: ${(props) => props.theme.colors.primary};
   cursor: pointer;
+
+  span {
+    background: ${(props) => props.theme.colors.primary};
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 `;
 
 export const DoneButton = styled(CancelButton)`
-  background-color: ${(props) => props.theme.colors.primary};
+  background: ${(props) => props.theme.colors.primary};
   color: inherit;
 `;
 

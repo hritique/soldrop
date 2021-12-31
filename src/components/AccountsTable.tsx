@@ -93,21 +93,23 @@ const UploadButton = styled.button`
   outline: none;
   padding: 0.6rem 0.8rem;
   border-radius: 4px;
-  background-color: ${(props) => props.theme.colors.primary};
+  background: ${(props) => props.theme.colors.primary};
   color: inherit;
   cursor: pointer;
 `;
 
 const ShowCsvEditorButton = styled.button`
-  margin-right: 1rem;
   padding: 1rem;
   border: none;
   outline: none;
   background: none;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 500;
-  color: ${(props) => props.theme.colors.primary};
+  background: ${(props) => props.theme.colors.primary};
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   text-decoration: underline;
+  text-decoration-color: #f76262;
   text-underline-offset: 0.2rem;
   cursor: pointer;
 `;

@@ -235,6 +235,10 @@ const Table = styled.table`
       font-size: inherit;
       padding: 0.4rem 0;
 
+      &::placeholder {
+        color: white;
+      }
+
       &:focus {
         border: none;
         outline: none;

@@ -264,22 +264,25 @@ function App() {
               />
             )}
 
-            {accounts.filter((a) => a.publicKey.isValid).length > 0 ? (
-              <span className="gas-fees">
-                Approximate Gas Fees:{' '}
-                {(
-                  accounts.filter((a) => a.publicKey.isValid).length * 0.000005
-                ).toFixed(5)}{' '}
-                SOL
-              </span>
-            ) : null}
+            <div className="container">
+              {accounts.filter((a) => a.publicKey.isValid).length > 0 ? (
+                <span className="gas-fees">
+                  Approximate Gas Fees:{' '}
+                  {(
+                    accounts.filter((a) => a.publicKey.isValid).length *
+                    0.000005
+                  ).toFixed(5)}{' '}
+                  SOL
+                </span>
+              ) : null}
 
-            <SubmitButton
-              onClick={handleSubmit}
-              disabled={!wallet || isSubmitting || !(accounts.length > 0)}
-            >
-              {isSubmitting ? transactionMessage : 'Airdrop tokens'}
-            </SubmitButton>
+              <SubmitButton
+                onClick={handleSubmit}
+                disabled={!wallet || isSubmitting || !(accounts.length > 0)}
+              >
+                {isSubmitting ? transactionMessage : 'Airdrop tokens'}
+              </SubmitButton>
+            </div>
           </Footer>
         </Container>
       </AppContext.Provider>
@@ -294,7 +297,7 @@ const Container = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
-  background-color: ${(props) => props.theme.colors.background};
+  background: ${(props) => props.theme.colors['background-gradient']};
 `;
 
 const Content = styled.div`
@@ -303,6 +306,15 @@ const Content = styled.div`
   flex-grow: 1;
   flex-shrink: 1;
   overflow: auto;
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 `;
 
 const Main = styled.main`
@@ -316,35 +328,44 @@ const Main = styled.main`
 
 const Footer = styled.footer`
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   padding: 2rem 0;
-  z-index: 1;
+  align-items: center;
   bottom: 0;
   left: 0;
-  background-color: ${(props) => props.theme.colors.background};
+  background: transparent;
+  z-index: 1;
 
   .gas-fees {
     display: inline-block;
-    width: 50rem;
+    width: 100%;
     text-align: right;
     font-size: 0.8rem;
+    margin-bottom: 12px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 50rem;
+    margin: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
   }
 `;
 
 const SubmitButton = styled.button`
   border: none;
   outline: none;
-  width: 50rem;
+  width: 100%;
   padding: 1rem;
   margin: auto;
   color: inherit;
-  background-color: ${(props) => props.theme.colors.primary};
+  background: ${(props) => props.theme.colors.primary};
   font-size: 1rem;
   border-radius: 6px;
   cursor: pointer;
-  margin-top: 12px;
 
   &:disabled {
     opacity: 0.5;
