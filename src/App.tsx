@@ -93,7 +93,7 @@ function App() {
       let numberOfNewAccounts = 1; // 1 for temporary account
 
       const newAccountRequirement = await batchRequests(
-        accounts.slice(0, 20),
+        accounts,
         10,
         1000,
         async (address, index) => {
