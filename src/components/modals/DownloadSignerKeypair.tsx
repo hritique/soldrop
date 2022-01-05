@@ -71,7 +71,7 @@ const Container = styled.div`
 
 const DownloadButton = styled.button`
   background: none;
-  color: ${({ theme }) => theme.colors.primary};
+  color: #f76262;
   border: none;
   font-size: inherit;
   text-decoration: underline;
